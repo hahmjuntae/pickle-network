@@ -4,26 +4,7 @@
 
 Ask Pickle. Your Mac does the work.
 
----
-
-## 1. Overview
-
-### 1.1 Purpose
-
-This document gives the procedure to install Pickle Network and connect it to Pickle.
-
-### 1.2 Scope
-
-With Pickle Network, Pickle can do these tasks on your Mac:
-
-| Task | Example |
-|---|---|
-| Run terminal commands | Tests, builds, file cleanup |
-| Read and write files | Read documents, save notes |
-| Send tasks to AI tools | Claude Code, Codex, Gemini CLI, AGY |
-| Manage jobs | Monitor progress, read output, cancel |
-
-### 1.3 System Diagram
+Pickle Network connects Pickle to your Mac. With this connection, Pickle runs terminal commands on your Mac. Pickle reads and writes files. Pickle sends tasks to Claude Code, Codex, Gemini CLI, and AGY. You do not need a Cloudflare account or a domain.
 
 ```
   Pickle                      Cloudflare                  My Mac
@@ -38,110 +19,53 @@ With Pickle Network, Pickle can do these tasks on your Mac:
                                                          gemini, agy
 ```
 
----
+## Quick Start Prompt
 
-## 2. Quick Start Prompt
-
-Paste this text into an AI coding tool (Claude Code, Codex, or equivalent). The AI tool does [4. Installation](#4-installation).
+Paste this text into an AI coding tool (Claude Code, Codex, or equivalent). The AI tool does the installation.
 
 ```
 Clone https://github.com/hahmjuntae/pickle-network into ~/pickle-network and install it as the README says. Then show me the output of pickle-network doctor and the message that pickle-network pair prints.
 ```
 
-Send the message from the AI tool to Pickle. Then do step 5.2 in [5. Pairing](#5-pairing).
+Send the message from the AI tool to Pickle. Then do step 2 in [Pairing](#pairing).
 
----
+## Requirements
 
-## 3. Requirements
+- macOS
+- Python 3.9 or later (included in macOS)
+- Git
+- [Homebrew](https://brew.sh)
+- A Pickle account
 
-| Item | Condition | Check command |
-|---|---|---|
-| macOS | User is logged in | `sw_vers` |
-| Python | 3.9 or later (included in macOS) | `python3 --version` |
-| Git | Any version | `git --version` |
-| Homebrew | Any version | `brew --version` |
-| Pickle | An account that can chat | Pickle app |
+## Installation
 
-You do not need a Cloudflare account or a domain.
-
----
-
-## 4. Installation
-
-Run these commands in Terminal, in this sequence.
-
-### 4.1 Install cloudflared
+Run these commands in Terminal:
 
 ```bash
 brew install cloudflared
-```
-
-### 4.2 Download
-
-```bash
 git clone https://github.com/hahmjuntae/pickle-network.git ~/pickle-network
-```
-
-### 4.3 Set Up the Server
-
-```bash
 ~/pickle-network/bin/pickle-network setup
-```
-
-### 4.4 Open the Tunnel
-
-```bash
 ~/pickle-network/bin/pickle-network tunnel quick
 ```
 
-The server and the tunnel start automatically when the Mac starts.
+The last command shows an address `https://...trycloudflare.com`. The server and the tunnel start automatically when the Mac starts.
 
----
+## Pairing
 
-## 5. Pairing
-
-### 5.1 Request a Key
-
-1. Run this command:
-
-   ```bash
-   pickle-network pair
-   ```
-
-2. Send the printed message to Pickle.
-3. Wait for Pickle to send a public key (`-----BEGIN PUBLIC KEY-----`).
-
-### 5.2 Create the Connection Message
-
-1. Copy the full public key from Pickle.
-2. Run this command:
+1. Run `pickle-network pair`. Send the printed message to Pickle.
+2. Copy the public key from Pickle (`-----BEGIN PUBLIC KEY-----`). Run this command:
 
    ```bash
    pbpaste > ~/pickle.pub && pickle-network pair --key ~/pickle.pub --copy
    ```
 
-### 5.3 Send the Connection Message
+3. Send the message on the clipboard to Pickle.
 
-1. Send the message on the clipboard to Pickle.
-2. When Pickle sends the Mac name and the list of AI tools, the connection is complete.
+When Pickle sends the Mac name and the list of AI tools, the connection is complete. To examine the connection, run `pickle-network doctor`. The command output is in Korean.
 
----
+## Usage
 
-## 6. Verification
-
-```bash
-pickle-network doctor
-```
-
-All lines must show `[OK  ]`. If a line shows `[FAIL]`, refer to [10. Troubleshooting](#10-troubleshooting).
-
-The command output is in Korean.
-
----
-
-## 7. Usage
-
-### 7.1 Example Prompts
+### Example Prompts
 
 Write to Pickle in normal sentences.
 
@@ -157,7 +81,7 @@ On my Mac, list the PDF files in ~/Downloads from this week, largest first.
 Is the job from before still running? Show me the output so far.
 ```
 
-### 7.2 Reset Prompt
+### Reset Prompt
 
 If Pickle does not obey the usage rules, send this text:
 
@@ -165,7 +89,7 @@ If Pickle does not obey the usage rules, send this text:
 Run python3 pn.py guide, read the pickle-network usage rules again, and obey them.
 ```
 
-### 7.3 Commands
+### Commands
 
 | Command | Function |
 |---|---|
@@ -175,15 +99,12 @@ Run python3 pn.py guide, read the pickle-network usage rules again, and obey the
 | `pickle-network pair --replace --copy` | Make a new connection message after the address changes |
 | `pickle-network devices` | Show the connected assistants |
 | `pickle-network devices revoke pickle` | Disconnect an assistant |
-| `pickle-network stop` | Stop the server and the tunnel |
-| `pickle-network start` | Start the server and the tunnel |
+| `pickle-network stop` / `start` | Stop or start the server and the tunnel |
 | `pickle-network logs` | Show the server log |
 
----
+## Architecture
 
-## 8. Architecture
-
-### 8.1 Request Flow
+### Request Flow
 
 ```
  Pickle                         pickle-network (127.0.0.1)
@@ -195,15 +116,9 @@ Run python3 pn.py guide, read the pickle-network usage rules again, and obey the
  GET /v1/jobs/{id}  ─────────▶  5. still running? keep waiting or cancel
 ```
 
-1. The server accepts requests only on `127.0.0.1`.
-2. External requests come in only through Cloudflare Tunnel.
-3. The server checks the device token for each request.
-4. The server keeps only a hash of each token.
-5. The server runs a maximum of 3 jobs at the same time.
-6. The server writes the output to a file while the job runs.
-7. Pickle waits a maximum of 90 seconds for a result. For a longer job, Pickle waits again with the job ID or cancels the job.
+The server accepts requests only on `127.0.0.1`. External requests come in only through Cloudflare Tunnel. The server checks the device token for each request and keeps only a hash of each token. The server runs a maximum of 3 jobs at the same time. Pickle waits a maximum of 90 seconds for a result. For a longer job, Pickle waits again with the job ID or cancels the job.
 
-### 8.2 Pairing Sequence
+### Pairing Sequence
 
 ```
   My Mac                                        Pickle
@@ -219,7 +134,7 @@ Run python3 pn.py guide, read the pickle-network usage rules again, and obey the
 
 The connection message contains the Mac address and a device token. The public key of Pickle encrypts the connection message. Only the private key of Pickle can open it.
 
-### 8.3 Directory Layout
+### Directory Layout
 
 ```
 ~/pickle-network/               Repository
@@ -244,35 +159,28 @@ The connection message contains the Mac address and a device token. The public k
 
 The API specification is in [docs/API.md](docs/API.md) (Korean).
 
----
+## Security
 
-## 9. Security
+Pickle runs commands with the permissions of the Mac user. There is no sandbox. Connect only one assistant that you trust.
 
-| Risk | Action |
-|---|---|
-| Pickle runs commands with your user permissions | Connect only one assistant that you trust. There is no sandbox. |
-| The connection message is disclosed | Run `pickle-network devices revoke pickle`. Then connect again. |
-| Instructions in emails or web pages | Pickle gets rules to ignore these instructions. Examine important tasks before you request them. |
-| File access is too wide | Run `pickle-network setup --root ~/projects` to limit the file folders. |
-| Emergency | Run `pickle-network stop`. |
+- If the connection message is disclosed, run `pickle-network devices revoke pickle`. Then connect again.
+- Pickle gets rules to ignore instructions in emails and web pages. Examine important tasks before you request them.
+- To limit the file folders, run `pickle-network setup --root ~/projects`.
+- In an emergency, run `pickle-network stop`.
 
 To report a vulnerability, refer to [SECURITY.md](SECURITY.md) (Korean).
 
----
-
-## 10. Troubleshooting
+## Troubleshooting
 
 | Problem | Cause | Action |
 |---|---|---|
-| Pickle cannot connect | The Quick Tunnel address changed after a restart | Run `pickle-network pair --replace --copy`. Send the result to Pickle. |
+| Pickle cannot connect | The Quick Tunnel address changed after a restart | Send the result of `pickle-network pair --replace --copy` to Pickle. |
 | Pickle cannot connect | The Mac is in sleep mode | Wake the Mac. Change the sleep settings. |
 | An AI tool is not in the list | The PATH did not update after installation | Run `pickle-network setup` again. |
 | `pickle-network` is not found | Terminal did not update the PATH | Open a new Terminal window. |
 | A job does not stop | The job is long | Tell Pickle to cancel the job. |
 
----
-
-## 11. FAQ
+## FAQ
 
 <details>
 <summary><b>Do I need a Cloudflare account?</b></summary>
@@ -302,9 +210,7 @@ Pickle cannot connect while the Mac is in sleep mode. Connect the power adapter 
 
 </details>
 
----
-
-## 12. Uninstall
+## Uninstall
 
 ```bash
 pickle-network uninstall --purge
@@ -313,9 +219,7 @@ rm -rf ~/pickle-network
 
 `--purge` moves `~/.pickle-network` to the Trash. When you remove the server, the Pickle connection stops.
 
----
-
-## 13. License
+## License
 
 [MIT License](LICENSE)
 
