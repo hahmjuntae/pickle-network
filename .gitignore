@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+.DS_Store
+*.pem
+*.enc
+*.sqlite3*
+.env
