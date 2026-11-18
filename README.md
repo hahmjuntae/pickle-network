@@ -69,6 +69,55 @@ git clone https://github.com/hahmjuntae/pickle-network.git ~/pickle-network
 아까 맡긴 작업 아직 돌고 있어? 지금까지 나온 출력만 보여줘.
 ```
 
+## 동작 방식
+
+```mermaid
+flowchart LR
+    P["피클 비서<br/>pn.py"] -->|HTTPS| C["Cloudflare Tunnel"]
+    C --> S["pickle-network<br/>내 맥 127.0.0.1"]
+    S --> Z["터미널 명령<br/>zsh"]
+    S --> A["AI 도구<br/>claude · codex · gemini · agy"]
+    S --> F["파일 읽기 · 쓰기"]
+    S --> D[("작업 기록<br/>SQLite")]
+```
+
+피클은 자기 작업 공간에서 `pn.py`라는 작은 프로그램으로 내 맥에 요청을 보냅니다. 요청은 Cloudflare Tunnel을 거쳐 맥에서만 열려 있는 서버(`127.0.0.1`)에 도착합니다. 공유기 포트를 열 필요가 없습니다.
+
+### 요청 처리 흐름
+
+1. 서버가 요청에 담긴 기기 토큰을 확인합니다. 토큰이 없거나 틀리면 거절합니다.
+2. 작업을 대기열에 넣습니다. 최대 3개까지 동시에 실행됩니다.
+3. 명령이나 AI 도구를 실행하고, 출력은 실행 중에도 파일에 기록합니다.
+4. 피클은 작업이 끝날 때까지 기다렸다가 결과를 받습니다. 오래 걸리면 작업 ID로 다시 확인하거나 취소할 수 있습니다.
+
+### 연결 순서
+
+```text
+맥                                        피클
+pickle-network pair  ── 키 요청 문장 ──▶   python3 pn.py keygen
+                     ◀──── 공개키 ─────
+pair --key 공개키    ── 연결 메시지 ───▶   python3 pn.py connect 'pn1e....'
+                                           python3 pn.py hello
+```
+
+연결 메시지에는 맥 주소와 기기 토큰이 들어 있고, 피클의 공개키로 암호화돼 있습니다. 대화 기록에 남아도 피클의 개인키가 없으면 열 수 없습니다.
+
+### 데이터 위치
+
+모든 데이터는 `~/.pickle-network`에 있고 본인만 읽을 수 있습니다.
+
+```text
+~/.pickle-network
+├── config.json     설정 (포트, 허용 폴더, 터널)
+├── devices.json    연결된 비서 목록 (토큰은 해시로만 저장)
+├── jobs.sqlite3    작업 기록
+├── jobs/           작업별 출력
+├── keys/           터널 정보, 피클 공개키
+└── logs/           서버, 접근, 터널 로그
+```
+
+작업 기록은 14일 뒤 자동으로 지워집니다. 더 자세한 내용은 [API 문서](docs/API.md)에 있습니다.
+
 ## 명령어
 
 | 명령 | 설명 |
