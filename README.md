@@ -369,11 +369,13 @@ Python과 HTTPS를 쓸 수 있는 환경이면 같은 방법으로 연결됩니�
 
 | 항목 | 결과 |
 |---|---|
-| 자동 시험 | 12개 통과 (macOS, Python 3.9.6, 3.14.7) |
+| 자동 시험 | 13개 통과 (macOS, Python 3.9.6, 3.14.7) |
 | 설치, LaunchAgent 등록, 재시작 | macOS 27.2.1 Apple Silicon에서 확인 |
 | 도메인 터널 + Access | 정상 200, 잘못된 기기 토큰 401, Access 없는 요청 차단 확인 |
-| AI CLI 위임 | Claude Code 2.1.327 `read` 모드 실제 호출 확인 |
-| 피클 연결 | 확인 중 |
+| 피클 키 생성과 암호화 연결 | 피클 비서가 `keygen`, `connect`, `guide`, `hello` 실행. 맥 이름과 AI CLI 목록 보고 확인 |
+| 피클의 원격 작업 | `run` 명령 실행, 파일 쓰기와 읽기, `ask --agent claude --mode read` 위임 성공. 피클이 보고한 작업 ID와 출력이 맥 기록과 일치 |
+| 클라이언트 갱신, 취소 | 공개 클라이언트로 `update`, 따옴표 없는 `~` 경로, 실행 중 작업 취소 확인 |
+| 미확인 | Quick Tunnel 장시간 유지, codex CLI 실제 호출 (시험 맥에 미설치) |
 
 ## 개발
 

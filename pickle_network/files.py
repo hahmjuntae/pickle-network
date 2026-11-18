@@ -24,16 +24,15 @@ class Files:
         if not candidate.is_absolute():
             raise ApiError("invalid_path", "절대 경로나 ~ 경로가 필요합니다")
         if must_exist:
-            if not candidate.exists() and not candidate.is_symlink():
-                raise ApiError("not_found", "경로가 없습니다", 404)
             resolved = candidate.resolve()
         else:
-            parent = candidate.parent.resolve()
-            resolved = parent / candidate.name
+            resolved = candidate.parent.resolve() / candidate.name
             if resolved.is_symlink():
                 resolved = resolved.resolve()
         if not any(resolved == root or root in resolved.parents for root in self.roots):
-            raise ApiError("path_denied", "허용된 폴더 밖의 경로입니다", 403)
+            raise ApiError("path_denied", "허용된 폴더 밖의 경로입니다: " + raw, 403)
+        if must_exist and not resolved.exists():
+            raise ApiError("not_found", "경로가 없습니다: " + raw, 404)
         return resolved
 
     def read(self, raw: str, offset: int = 0, limit: int = MAX_FILE_BYTES) -> dict:

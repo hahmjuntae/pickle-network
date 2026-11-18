@@ -338,6 +338,17 @@ class Client:
 
 
 
+def mac_path(value):
+    if not value:
+        return value
+    local_home = str(Path.home()).rstrip("/")
+    if local_home and value == local_home:
+        return "~"
+    if local_home and value.startswith(local_home + "/"):
+        return "~" + value[len(local_home):]
+    return value
+
+
 def _config_path(args) -> Path:
     return Path(args.config or os.environ.get("PN_CONFIG") or DEFAULT_DIR / "config.json")
 
@@ -451,7 +462,7 @@ def cmd_simple(path: str):
 
 
 def cmd_run(args) -> int:
-    body = {"command": args.command, "cwd": args.cwd, "timeout": args.timeout, "request_id": args.id}
+    body = {"command": args.command, "cwd": mac_path(args.cwd), "timeout": args.timeout, "request_id": args.id}
     status, value = _submit(Client(_load_config(args)), "/v1/run", {k: v for k, v in body.items() if v is not None}, args.wait)
     return _emit(status, value)
 
@@ -459,7 +470,7 @@ def cmd_run(args) -> int:
 def cmd_ask(args) -> int:
     prompt = sys.stdin.read() if args.prompt == "-" else args.prompt
     body = {"prompt": prompt, "agent": args.agent, "mode": args.mode, "model": args.model,
-            "cwd": args.cwd, "timeout": args.timeout, "request_id": args.id}
+            "cwd": mac_path(args.cwd), "timeout": args.timeout, "request_id": args.id}
     status, value = _submit(Client(_load_config(args)), "/v1/ask", {k: v for k, v in body.items() if v is not None}, args.wait)
     return _emit(status, value)
 
@@ -490,13 +501,13 @@ def cmd_cancel(args) -> int:
 
 
 def cmd_ls(args) -> int:
-    status, value = Client(_load_config(args)).request("GET", "/v1/files", query={"path": args.path})
+    status, value = Client(_load_config(args)).request("GET", "/v1/files", query={"path": mac_path(args.path)})
     return _emit(status, value)
 
 
 def cmd_cat(args) -> int:
     status, value = Client(_load_config(args)).request(
-        "GET", "/v1/files", query={"path": args.path, "offset": args.offset, "limit": args.limit})
+        "GET", "/v1/files", query={"path": mac_path(args.path), "offset": args.offset, "limit": args.limit})
     if status == 200 and args.out and value.get("file"):
         info = value["file"]
         data = base64.b64decode(info["content"]) if info["encoding"] == "base64" else info["content"].encode("utf-8")
@@ -506,7 +517,7 @@ def cmd_cat(args) -> int:
 
 
 def cmd_put(args) -> int:
-    body = {"path": args.path, "create_dirs": args.mkdir}
+    body = {"path": mac_path(args.path), "create_dirs": args.mkdir}
     if args.file:
         body["content_base64"] = base64.b64encode(Path(args.file).read_bytes()).decode("ascii")
     elif args.text is not None:

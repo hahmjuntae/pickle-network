@@ -133,6 +133,10 @@ class ServerCase(unittest.TestCase):
         self.assertEqual([e["name"] for e in value["dir"]["entries"]], ["deep", "b.bin"])
         status, value = self.call("GET", "/v1/files", query={"path": "/etc/hosts"})
         self.assertEqual((status, value["error"]["code"]), (403, "path_denied"))
+        status, value = self.call("GET", "/v1/files", query={"path": "/no/such/place"})
+        self.assertEqual((status, value["error"]["code"]), (403, "path_denied"))
+        status, value = self.call("GET", "/v1/files", query={"path": str(self.work / "missing")})
+        self.assertEqual((status, value["error"]["code"]), (404, "not_found"))
         link = self.work / "escape"
         link.symlink_to("/etc")
         status, _ = self.call("GET", "/v1/files", query={"path": str(link / "hosts")})
