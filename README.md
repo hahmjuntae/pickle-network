@@ -4,6 +4,14 @@
 
 pickle-network는 피클(Pickle) 비서와 내 맥을 이어 주는 작은 서버입니다. 연결된 피클은 맥에서 터미널 명령을 실행하고, 파일을 읽고 쓰고, Claude Code·Codex·Gemini CLI에 일을 맡길 수 있습니다. 계정 가입이나 도메인은 필요 없습니다.
 
+Claude Code, Codex 같은 AI 코딩 도구에 아래 한 줄을 붙여넣으면 설치부터 연결 준비까지 알아서 합니다.
+
+```
+https://github.com/hahmjuntae/pickle-network 를 ~/pickle-network 에 clone하고 README대로 설치한 뒤, pickle-network doctor 결과와 pickle-network pair 가 출력한 문장을 보여줘.
+```
+
+출력된 문장을 피클에게 보내고 [피클 연결](#피클-연결) 2단계부터 이어 가면 됩니다.
+
 ```
   Pickle                      Cloudflare                  My Mac
  ┌────────────┐   HTTPS    ┌────────────┐            ┌──────────────────┐
@@ -158,18 +166,6 @@ pickle-network pair --replace --copy
 <summary><b>안전한가요?</b></summary>
 
 연결된 피클은 내 맥에서 나와 같은 권한으로 움직입니다. 내 비서 하나만 연결하고, 이상하면 `pickle-network stop`으로 바로 멈추세요. 파일 범위를 줄이려면 `pickle-network setup --root ~/projects`처럼 폴더를 지정합니다.
-
-</details>
-
-<details>
-<summary><b>설치를 AI에게 맡길 수 있나요?</b></summary>
-
-Claude Code나 Codex에 이렇게 붙여넣으세요.
-
-```
-https://github.com/hahmjuntae/pickle-network 를 ~/pickle-network 에 clone하고 README의 "설치"대로 설치해 줘.
-pickle-network doctor 결과를 보여주고, pickle-network pair 가 출력한 문장을 알려줘.
-```
 
 </details>
 
