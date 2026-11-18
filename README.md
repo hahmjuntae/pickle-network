@@ -1,4 +1,4 @@
-# pickle-network
+# Pickle Network
 
 피클에게 부탁하면 내 맥이 대신 일합니다.
 
@@ -136,16 +136,34 @@ pickle-network uninstall --purge       완전히 지우기
 
 ## 질문과 답
 
-**Cloudflare 계정이 필요한가요?**
+<details>
+<summary><b>Cloudflare 계정이 필요한가요?</b></summary>
+
 아니요. `tunnel quick`은 계정 없이 임시 주소를 만듭니다. 주소를 고정하고 싶을 때만 [내 도메인으로 연결하기](docs/DOMAIN.md)를 따르세요.
 
-**피클이 갑자기 접속을 못 해요.**
-임시 주소는 맥을 재시동하면 바뀝니다. `pickle-network pair --replace --copy` 결과를 피클에게 다시 보내 주세요. 맥이 잠자기 상태여도 접속할 수 없습니다.
+</details>
 
-**안전한가요?**
+<details>
+<summary><b>피클이 갑자기 접속을 못 해요.</b></summary>
+
+임시 주소는 맥을 재시동하면 바뀝니다. 아래 명령의 결과를 피클에게 다시 보내 주세요. 맥이 잠자기 상태여도 접속할 수 없습니다.
+
+```bash
+pickle-network pair --replace --copy
+```
+
+</details>
+
+<details>
+<summary><b>안전한가요?</b></summary>
+
 연결된 피클은 내 맥에서 나와 같은 권한으로 움직입니다. 내 비서 하나만 연결하고, 이상하면 `pickle-network stop`으로 바로 멈추세요. 파일 범위를 줄이려면 `pickle-network setup --root ~/projects`처럼 폴더를 지정합니다.
 
-**설치를 AI에게 맡길 수 있나요?**
+</details>
+
+<details>
+<summary><b>설치를 AI에게 맡길 수 있나요?</b></summary>
+
 Claude Code나 Codex에 이렇게 붙여넣으세요.
 
 ```
@@ -153,12 +171,7 @@ https://github.com/hahmjuntae/pickle-network 를 ~/pickle-network 에 clone하�
 pickle-network doctor 결과를 보여주고, pickle-network pair 가 출력한 문장을 알려줘.
 ```
 
+</details>
 
-## 문서
-
-- [API](docs/API.md)
-- [내 도메인으로 연결하기](docs/DOMAIN.md)
-- [개발](docs/DEVELOPMENT.md)
-- [보안](SECURITY.md)
 
 MIT License. Pickle, Inc.와 관계없는 개인 프로젝트입니다.
