@@ -524,6 +524,9 @@ def main(argv=None) -> int:
         return int(args.func(args) or 0)
     except KeyboardInterrupt:
         return 130
+    except BrokenPipeError:
+        os.dup2(os.open(os.devnull, os.O_WRONLY), sys.stdout.fileno())
+        return 0
     except (RuntimeError, FileNotFoundError, ValueError) as exc:
         say("오류: %s" % exc)
         return 1
